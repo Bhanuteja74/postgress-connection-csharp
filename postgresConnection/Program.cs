@@ -1,13 +1,16 @@
 ﻿using System;
 using Npgsql;
+using DotNetEnv;
 
 class Program
 {
     static void Main()
     {
-        var connectionString = "Host=localhost;Username=bhanutejakommi;Database=postgres";
 
-        var conn = new NpgsqlConnection(connectionString);
+        Env.Load("../../../.env");
+        var envString = Environment.GetEnvironmentVariable("DB_CONNECTION");
+        
+        var conn = new NpgsqlConnection(envString);
         conn.Open();
         
         var deleteCmd = new NpgsqlCommand("DELETE FROM student WHERE age=21", conn);
