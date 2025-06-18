@@ -1,43 +1,41 @@
-using System;
-using System.IO;
-using Npgsql;
-using DotNetEnv;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using postgresConnection.DBContext;
+using postgresConnection.Models;
 
 class Program
 {
     static void Main()
     {
+        var config = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .Build();
 
-        
-        var envString = DB_String();
+        var optionBuilder = new DbContextOptionsBuilder<AppDBContext>();
+        optionBuilder.UseNpgsql(config.GetConnectionString("DBConnection"));
 
-        using var conn = new NpgsqlConnection(envString);
-        conn.Open();
-        
-        var deleteCmd = new NpgsqlCommand("DELETE FROM student WHERE age=16", conn);
-        deleteCmd.ExecuteNonQuery();
-        
-        var insertCmd = new NpgsqlCommand("INSERT INTO student(name, age) VALUES (@name, @age)", conn);
-        insertCmd.Parameters.AddWithValue("name", "Hari");
-        insertCmd.Parameters.AddWithValue("age", 16);
-        insertCmd.ExecuteNonQuery();
-        
-        var cmd = new NpgsqlCommand("SELECT name,age FROM student", conn);
-        using var reader = cmd.ExecuteReader();
 
-        while (reader.Read())
+        var context = new AppDBContext(optionBuilder.Options);
+        // db.Database.EnsureCreated();  
+        Console.WriteLine("Database created successfully!");
+
+        Employee employee = new Employee
         {
-            Console.WriteLine($"Age: {reader.GetInt32(1)}, Name: {reader.GetString(0)}");
+            Name = "John Doe",
+            Email = "john@gmail.com"
+        };
+
+        context.Add(employee);
+        context.SaveChanges();
+        Console.WriteLine("Employee added successfully!");
+
+
+        var employees = context.Employees.ToList();
+        Console.WriteLine("Employees in the database:");
+        foreach (var emp in employees)
+        {
+            Console.WriteLine($"Id: {emp.Id}, Name: {emp.Name}, Email: {emp.Email}");
         }
-        
-        conn.Close();
-    }
-
-    private static string? DB_String()
-    {
-        Env.Load(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".env"));
-
-        var envString = Environment.GetEnvironmentVariable("DB_CONNECTION");
-        return envString;
     }
 }
