@@ -26,11 +26,35 @@ class Program
             Email = "john@gmail.com"
         };
 
+        AddEmployee(context, employee);
+        DeleteEmployee(context, 1);
+        GetAllEmployes(context);
+    }
+
+    private static void DeleteEmployee(AppDBContext context, int employeeId)
+    {
+        var employee = context.Employees.Find(employeeId);
+        if (employee != null)
+        {
+            context.Employees.Remove(employee);
+            context.SaveChanges();
+            Console.WriteLine("Employee deleted successfully!");
+        }
+        else
+        {
+            Console.WriteLine("Employee not found!");
+        }
+    }
+
+    private static void AddEmployee(AppDBContext context, Employee employee)
+    {
         context.Add(employee);
         context.SaveChanges();
         Console.WriteLine("Employee added successfully!");
+    }
 
-
+    private static void GetAllEmployes(AppDBContext context)
+    {
         var employees = context.Employees.ToList();
         Console.WriteLine("Employees in the database:");
         foreach (var emp in employees)
