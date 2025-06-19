@@ -3,17 +3,16 @@ using Microsoft.Extensions.Configuration;
 using postgresConnection.DBContext;
 using postgresConnection.Models;
 
+using Microsoft.EntityFrameworkCore.SqlServer;
+    
 class Program
 {
     static void Main()
     {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-            .Build();
+        var config = ConfigurationRoot();
 
         var optionBuilder = new DbContextOptionsBuilder<AppDBContext>();
-        optionBuilder.UseNpgsql(config.GetConnectionString("DBConnection"));
+        optionBuilder.UseSqlServer(config.GetConnectionString("sql"));
 
 
         var context = new AppDBContext(optionBuilder.Options);
@@ -29,6 +28,15 @@ class Program
         AddEmployee(context, employee);
         DeleteEmployee(context, 1);
         GetAllEmployes(context);
+    }
+
+    private static IConfigurationRoot ConfigurationRoot()
+    {
+        var config = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .Build();
+        return config;
     }
 
     private static void DeleteEmployee(AppDBContext context, int employeeId)

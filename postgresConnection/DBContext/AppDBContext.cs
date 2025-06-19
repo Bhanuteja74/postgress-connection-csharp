@@ -16,11 +16,13 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDBContext>
             .AddJsonFile("appsettings.json", optional: false)
             .Build();
 
-        var connectionString = config.GetConnectionString("DBConnection");
+        // var connectionString = config.GetConnectionString("DBConnection");
 
+        var connectionString = config.GetConnectionString("sql");
+        
         var optionsBuilder = new DbContextOptionsBuilder<AppDBContext>();
-        optionsBuilder.UseNpgsql(connectionString);
-
+        // optionsBuilder.UseNpgsql(connectionString);
+        optionsBuilder.UseSqlServer(connectionString);
         return new AppDBContext(optionsBuilder.Options);
     }
 }
